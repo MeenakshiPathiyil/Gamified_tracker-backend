@@ -1,6 +1,6 @@
 const Habit = require('../models/Habit');
 
-exports.updateHabitProgress = async (req, res) => {
+const updateHabitProgress = async (req, res) => {
     const {habitId, isCompleted} = req.body;
 
     try {
@@ -24,6 +24,8 @@ exports.updateHabitProgress = async (req, res) => {
         res.status(500).json({message: 'Error updating habit progress', error});
     }
 };
+
+module.exports = {updateHabitProgress};
 
 // habitSchema.methods.completeHabit = async function (isCompleted) {
 //     try {
