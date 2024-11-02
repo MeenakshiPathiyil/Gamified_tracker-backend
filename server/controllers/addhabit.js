@@ -4,7 +4,11 @@ const jwt = require('jsonwebtoken');
 
 const addNewHabit = async(req, res) => {
     console.log('Request body:', req.body);
-    const {title, frequency} = req.body;
+    const {title, frequency, customDays } = req.body;
+
+    if (frequency === 'custom' && (!customDays || !customDays.length)) {
+        return res.status(400).json({message: 'Please select days for custom frequency'});
+    }
 
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -29,6 +33,7 @@ const addNewHabit = async(req, res) => {
         const newHabit = new Habit ({
             title,
             frequency,
+            customDays: frequency === 'custom' ? customDays: undefined,
             user: userId
             // daysOfWeek,
             // streak: 0,
