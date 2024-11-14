@@ -1,10 +1,6 @@
 const User = require('../models/userModel'); 
-const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 require('dotenv').config({ path:__dirname + '/.env'})
-
-console.log('JWT_SECRET in user controller:', process.env.JWT_SECRET); // this should output the secret directly if loaded correctly
-
 
 const registerUser = async (req, res) => {
   console.log('Data recieved at server in userController: ', req.body);
@@ -21,18 +17,14 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     console.log('Hashed Password:', hashedPassword);
 
-    // Create new user
+
     const newUser = new User({ username, email, password: hashedPassword });
-    await newUser.save(); // Save to MongoDB
+    await newUser.save();
 
-    console.log('JWT_SECRET:', process.env.JWT_SECRET);
     console.log('User registered: ', newUser);
+    req.session.userId = newUser._id;
 
-
-    const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {expiresIn: '1h'});
-    console.log('Generated token: ', token);
-
-    res.status(201).json({ message: 'User registered successfully', token });
+    res.status(201).json({ message: 'User registered successfully', sessionActive: true });
   } 
   catch (error) {
     console.error('Server error during registration: ', error);
@@ -49,12 +41,29 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ error: 'Invalid Credentials'});
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h'});
-    res.json({ message: 'User login successfull', token });
+    req.session.userId = user._id;
+    res.json({ message: 'User login successfull' });
   } 
   catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
 };
 
-module.exports = { registerUser, loginUser };
+const getUserProfile = async(req, res) => {
+  try {
+    const user = await User.findById(req.session.userId).select('username createdAt');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ username: user.username, Joined: user.createdAt });
+  }
+  catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { registerUser, loginUser, getUserProfile };
+
+

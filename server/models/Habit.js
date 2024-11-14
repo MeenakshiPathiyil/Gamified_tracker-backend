@@ -5,11 +5,8 @@ const habitSchema = new mongoose.Schema ({
     frequency: {
         type: String
     },
-    customDays: { type: [String], requires: function() {return this.frequency === 'custom'}},
+    customDays: { type: [String], default: undefined},
     user: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true}
-    // daysOfWeek: [{type: String, enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']}],
-    // streak: {type: Number, default: 0},
-    // points: {type: Number, default: 0}
 });
 
 const Habit = mongoose.model('Habit', habitSchema);

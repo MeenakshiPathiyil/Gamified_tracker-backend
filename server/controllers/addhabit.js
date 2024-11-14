@@ -58,3 +58,4 @@ const addNewHabit = async(req, res) => {
 };
 
 module.exports = {addNewHabit};
+

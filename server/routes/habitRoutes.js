@@ -21,3 +21,4 @@ habitRouter.get('/user/:userId', authenticateJWT, async (req, res) => {
 // habitRouter.post('/progress', updateProg.updateHabitProgress);
 
 module.exports = habitRouter;
+
