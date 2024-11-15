@@ -35,10 +35,12 @@ mongoose.connect(MONGO_URI)
 const userRouter = require('./routes/userRoutes');
 const habitRoutes = require('./routes/habitRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
+// const gameMapRoutes = require('./routes/gameMapRoutes');
 
 app.use('/api/user', userRouter); 
 app.use('/api/habits', habitRoutes);
 app.use('/api/feedback', feedbackRoutes);
+// app.use('/api/gameMap', gameMapRoutes);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
