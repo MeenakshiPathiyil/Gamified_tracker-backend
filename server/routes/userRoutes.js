@@ -4,7 +4,6 @@ const { registerUser, loginUser, getUserProfile } = require('../controllers/user
 const User = require('../models/userModel')
 const sessionAuth = require('../middleware/authMiddleware');
 
-// Define the route for registering a user
 userRouter.post('/register', registerUser);
 
 userRouter.post('/login', loginUser);
