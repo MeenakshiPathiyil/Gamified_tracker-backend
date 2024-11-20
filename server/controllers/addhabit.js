@@ -46,5 +46,31 @@ const addNewHabit = async (req, res) => {
     }
 };
 
+const updateHabitCompletion = async (req, res) => {
+    const { habitId, checkedDays } = req.body;
+    
+    if (!habitId || !checkedDays) {
+        return res.status(400).json({ message: 'Habit ID and checked days are required' });
+    }
 
-module.exports = { addNewHabit };
+    try {
+        const updatedHabit = await Habit.findByIdAndUpdate(
+            habitId, 
+            { $set: { checkedDays } }, // Update the checkedDays field
+            { new: true }
+        );
+
+        if (!updatedHabit) {
+            return res.status(404).json({ message: 'Habit not found' });
+        }
+
+        res.status(200).json({ message: 'Habit updated successfully', habit: updatedHabit });
+    } catch (error) {
+        console.error('Error updating habit completion:', error.message);
+        res.status(500).json({ message: 'Error updating habit', error: error.message });
+    }
+};
+
+
+
+module.exports = { addNewHabit, updateHabitCompletion };
