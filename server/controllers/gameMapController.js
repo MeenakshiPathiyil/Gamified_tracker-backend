@@ -1,64 +1,72 @@
-// const GameMap = require('../models/gameMap');
+// const User = require('../models/userModel');
+// const Item = require('../models/Item');
+// const House = require('../models/House');
 
-// exports.getgameMap = async (req, res) => {
+// const getGameState = async (req, res) => {
 //     try {
-//         const { userId } = req.params;
-//         const gameMap = await GameMap.findOne({ userId });
+//         const user = await User.findById(req.session.userId)
+//             .populate('unlockedHouses')
+//             .populate('unlockedItems')
+//             .populate('placedItems.item');
 
-//         if (!gameMap) {
-//             return res.status(404).json({ message: 'game map not found' });
+//         if (!user) {
+//             return res.status(404).json({ message: 'User not found' });
 //         }
 
-//         res.status(200).json(gameMap);
+//         res.status(200).json({
+//             coins: user.coins,
+//             points: user.points,
+//             unlockedHouses: user.unlockedHouses,
+//             unlockedItems: user.unlockedItems,
+//             placedItems: user.placedItems
+//         });
 //     }
 //     catch (error) {
-//         res.status(500).json({ message: 'Error retrieving game map', error: error.message });
+//         res.status(500).json({ message: 'Server error', error: error.message });
 //     }
 // };
 
-// exports.updateGameMap = async (req, res) => {
+const purchaseItem = async (req, res) => {
+    const { itemId } = req.body;
+    const user = await User.findById(req.session.userId);
+
+    const item = await Item.findById(itemId);
+    if (!item) {
+        return res.status(404).send({ message: 'Item not found' });
+    }
+
+    if (user.coins < item.cost) {
+        return res.status(400).send({ message: 'Insufficient coins' });
+    }
+
+    user.coins -= item.cost;
+    user.unlockedItems.push(itemId);
+    await user.save();
+
+    res.send({ message: 'Item purchased successfully', coins: user.coins });
+};
+
+
+// const placeItem = async (req, res) => {
 //     try {
-//         const { userId } = req.params;
-//         const { houses } = req.body;
-
-//         const updatedGameMap = await GameMap.findOneAndUpdate(
-//             {userId}, 
-//             { $set: { houses } },
-//             { new: true }
-//         );
-
-//         if (!updatedGameMap) {
-//             return res.status(404).json({ message: 'Game map not found' });
-//         }
-
-//         res.status(200).json(updatedGameMap);
+//       const { itemId, position } = req.body;
+//       const user = await User.findById(req.session.userId);
+  
+//       if (!user) {
+//         return res.status(404).json({ message: 'User not found' });
+//       }
+  
+//       if (!user.unlockedItems.includes(itemId)) {
+//         return res.status(400).json({ message: 'Item not unlocked' });
+//       }
+  
+//       user.placedItems.push({ item: itemId, position });
+//       await user.save();
+  
+//       res.status(200).json({ message: 'Item placed successfully', user });
+//     } catch (error) {
+//       res.status(500).json({ message: 'Server error', error: error.message });
 //     }
-//     catch(error) {
-//         res.status(500).json({ message: 'Error updating game map', error: error.message });
-//     }
-// };
-
-// exports.addItemToHouse = async (req, res) => {
-//     try {
-//         const {userId} = req.params;
-//         const { houseId, itemId, position }= req.body;
-
-//         const gameMap = await GameMap.findOne({ userId });
-//         if (!gameMap) {
-//             return res.status(404).json({ message: 'Game map not found' });
-//         }
-
-//         const house = gameMap.houses.find((h) => h.houseId === houseId);
-//         if (!house) {
-//             return res.status(404).json({ message: 'House not found' });
-//         }
-
-//         house.items.push({ itemId, position });
-
-//         await gameMap.save();
-//         res.status(200).json({ message: 'Item added successfully', gameMap });
-//     }
-//     catch (error) {
-//         res.staus(500).json({ message: 'Error adding item to house', error: error.message});
-//     }
-// };
+//   };
+  
+//   module.exports = { getGameState, purchaseItem, placeItem };
