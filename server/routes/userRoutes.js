@@ -10,6 +10,7 @@ userRouter.post('/login', loginUser);
 
 userRouter.get('/profile', sessionAuth, getUserProfile);  
 
+
 module.exports = userRouter;
 
 

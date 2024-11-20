@@ -37,12 +37,10 @@ app.use(session({
 
 const userRouter = require('./routes/userRoutes');
 const habitRoutes = require('./routes/habitRoutes');
-const feedbackRoutes = require('./routes/feedbackRoutes');
 const shopRoutes = require('./routes/shopRoutes');
 
 app.use('/api/user', userRouter); 
 app.use('/api/habits', habitRoutes);
-app.use('/api/feedback', feedbackRoutes);
 app.use('/api/shop', shopRoutes); 
 
 app.use((err, req, res, next) => {

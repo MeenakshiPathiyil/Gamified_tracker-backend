@@ -6,7 +6,8 @@ const habitSchema = new mongoose.Schema ({
         type: String
     },
     customDays: { type: [String], default: undefined},
-    user: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true}
+    checkedDays: { type: [Boolean], default: Array(7).fill(false) }, 
+    user: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
 });
 
 const Habit = mongoose.model('Habit', habitSchema);
