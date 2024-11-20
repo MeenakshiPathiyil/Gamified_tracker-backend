@@ -1,99 +1,62 @@
-const JournalEntry = require('../models/Journal');
+const Journal = require('../models/journalModel');
 
-exports.createJournalEntry = async (req, res) => {
-  try {
-    const { content, mood, tags } = req.body;
-    
-    // Assuming you have user authentication middleware that sets req.user
-    const newEntry = new JournalEntry({
-      user: req.user._id,
-      content,
-      mood,
-      tags
-    });
+/**
+ * Save a journal entry for the logged-in user
+ */
+const saveJournalEntry = async (req, res) => {
+    try {
+        // Assuming user ID is stored in the session
+        const userId = req.session.userId; 
 
-    const savedEntry = await newEntry.save();
+        if (!userId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
 
-    res.status(201).json({
-      message: 'Journal entry created successfully',
-      entry: savedEntry
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error creating journal entry',
-      error: error.message
-    });
-  }
-};
+        const { emotion, thoughts } = req.body;
 
-exports.getUserJournalEntries = async (req, res) => {
-  try {
-    const entries = await JournalEntry.find({ user: req.user._id })
-      .sort({ createdAt: -1 }) // Latest entries first
-      .select('content mood tags createdAt');
+        // Validate input
+        if (!emotion || !thoughts) {
+            return res.status(400).json({ message: 'Emotion and thoughts are required' });
+        }
 
-    res.status(200).json({
-      entries
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error fetching journal entries',
-      error: error.message
-    });
-  }
-};
+        // Create and save the journal entry
+        const newJournal = new Journal({ 
+            emotion, 
+            thoughts, 
+            userId // Associate the entry with the logged-in user
+        });
 
-exports.updateJournalEntry = async (req, res) => {
-  try {
-    const { entryId } = req.params;
-    const { content, mood, tags } = req.body;
+        await newJournal.save();
 
-    const updatedEntry = await JournalEntry.findOneAndUpdate(
-      { _id: entryId, user: req.user._id },
-      { content, mood, tags },
-      { new: true }
-    );
-
-    if (!updatedEntry) {
-      return res.status(404).json({
-        message: 'Journal entry not found'
-      });
+        res.status(201).json({ message: 'Journal entry saved successfully', journal: newJournal });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error saving journal entry' });
     }
+};
 
-    res.status(200).json({
-      message: 'Journal entry updated successfully',
-      entry: updatedEntry
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error updating journal entry',
-      error: error.message
-    });
+/**
+ * Get all journal entries for the logged-in user
+ */
+const getUserJournals = async (req, res) => {
+  try {
+      const userId = req.session.userId;
+
+      if (!userId) {
+          return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      const journals = await Journal.find({ userId });
+
+      res.status(200).json({ message: 'Journals retrieved successfully', journals });
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Error retrieving journal entries' });
   }
 };
 
-exports.deleteJournalEntry = async (req, res) => {
-  try {
-    const { entryId } = req.params;
 
-    const deletedEntry = await JournalEntry.findOneAndDelete({
-      _id: entryId,
-      user: req.user._id
-    });
-
-    if (!deletedEntry) {
-      return res.status(404).json({
-        message: 'Journal entry not found'
-      });
-    }
-
-    res.status(200).json({
-      message: 'Journal entry deleted successfully'
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error deleting journal entry',
-      error: error.message
-    });
-  }
+module.exports = {
+    saveJournalEntry,
+    getUserJournals,
 };
